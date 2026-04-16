@@ -43,7 +43,7 @@ function Login() {
                 onSubmit={handleLogin}
                 className='bg-white p-8 rounded-2xl shadow w-full max-w-sm flex flex-col gap-4'
             >
-                <h2 className='text-2xl font-bold text-center'>Ranipet District Admin</h2>
+                <h2 className='text-2xl font-bold text-center text-orange-600'>Ranipet District Admin</h2>
 
                 <input
                     type='email'
@@ -66,7 +66,7 @@ function Login() {
                 <button
                     type='submit'
                     disabled={loading}
-                    className='bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700'
+                    className='bg-orange-600 text-white py-3 rounded-xl hover:bg-orange-700'
                 >
                     {loading ? "Logging in..." : "Login"}
                 </button>
