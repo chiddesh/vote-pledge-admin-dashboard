@@ -27,8 +27,8 @@ function PledgeItem({ p }) {
 
             {/* Status Badge */}
             <span className={`px-2 sm:px-4 py-1 py-1 rounded-full text-xs w-fit font-extrabold
-                ${p?.will_vote === true ? "bg-green-200 text-green-500" : "bg-red-500"}`}>
-                Completed
+                ${p?.will_vote && p?.wont_accept_bribe === true ? "bg-green-200 text-green-500" : "bg-red-500"}`}>
+                {p?.will_vote && p?.wont_accept_bribe === true ? "COMPLETED" : "INCOMPLETE"}
             </span>
 
         </div>

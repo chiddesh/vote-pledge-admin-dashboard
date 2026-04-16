@@ -12,7 +12,8 @@ function Reports() {
         { type: "dropdown", label: "age", options: ["18-25", "26-40", "40+"] },
         { type: "button", label: "rural" },
         { type: "button", label: "urban" },
-        { type: "dropdown", label: "category", options: ["College/Institution", "SHG Members", "General Public", "Industries Employee", "Government Employees"] }
+        { type: "dropdown", label: "category", options: ["College/Institution", "SHG Members", "General Public", "Industries Employee", "Government Employees"] },
+        { type: "dropdown", label: "Completion", options: ["Completed", "Not Completed"] }
     ]
 
     const [filters, setFilters] = useState({})

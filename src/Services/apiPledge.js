@@ -31,6 +31,16 @@ export const filterPledge = async (filters = {}) => {
         query = query.eq("category",filters.category)
     }
 
+
+    /* COMPLETION */
+    if(filters.Completion === "Completed"){
+        query = query.eq("will_vote", true)
+    }
+
+    if(filters.Completion === "Not Completed"){
+        query = query.eq("will_vote", false)
+    }
+
     const { data, error } = await query
 
     if (error) throw new Error(error.message)
