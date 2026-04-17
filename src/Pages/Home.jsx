@@ -13,7 +13,46 @@ function Home() {
         { type: "button", label: "rural" },
         { type: "button", label: "urban" },
         { type: "dropdown", label: "category", options: ["College/Institution", "SHG Members", "General Public", "Industries Employee", "Government Employees"] },
-        { type: "dropdown", label: "Completion", options: ["Completed", "Not Completed"] }
+        { type: "dropdown", label: "Completion", options: ["Completed", "Not Completed"] },
+        { type: "dropdown", label: "first_time_voter", options: ["YES", "NO"] },
+        {
+            type: "dropdown", label: "ulb", options: [
+                "Ammoor TP",
+                "Kalavai TP",
+                "Kaveripakkam TP",
+                "Nemili TP",
+                "Panapakkam TP",
+                "Thakkolam TP",
+                "Thimiri TP",
+                "Vilapakkam TP",
+                "Arakkonam MP",
+                "Arcot MP",
+                "Melvisharam MP",
+                "Ranipet MP",
+                "Sholinghur MP",
+                "Wallajah MP"
+            ]
+        },
+        {
+            type: "dropdown", label: "block", options: [
+                "Arakkonam",
+                "Arcot",
+                "Kaveripakkam",
+                "Nemili",
+                "Sholingur",
+                "Thimiri",
+                "Walaja"
+            ]
+        },
+        {
+            type: "dropdown", label: "constituency", options: [
+                "Arakkonam",
+                "Sholingur",
+                "Ranipet",
+                "Arcot",
+                "Katpadi"
+            ]
+        }
     ]
 
     const [filters, setFilters] = useState({})

@@ -41,6 +41,27 @@ export const filterPledge = async (filters = {}) => {
         query = query.eq("will_vote", false)
     }
 
+
+    /* FIRST TIME VOTER */
+    if(filters.first_time_voter){
+        query = query.eq("first_time_voter", filters.first_time_voter)
+    }
+
+    /* ULB */
+    if(filters.ulb){
+        query = query.eq("ulb",filters.ulb)
+    }
+
+    /* BLOCK */
+    if(filters.block){
+        query = query.eq("block",filters.block)
+    }
+
+    /*  CONSTITUENCY */
+    if(filters.constituency){
+        query = query.eq("constituency",filters.constituency)
+    }
+
     const { data, error } = await query
 
     if (error) throw new Error(error.message)
