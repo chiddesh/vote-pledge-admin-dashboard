@@ -67,7 +67,6 @@ function Home() {
     const resetFilters = () => setFilters({})
 
     const { data, isLoading, error } = useFilterPledge(filters)
-    console.log(data)
 
     return (
         <>

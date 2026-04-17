@@ -1,12 +1,24 @@
 import React, { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { RiHome2Fill } from "react-icons/ri"
 import { TbReportAnalytics } from "react-icons/tb"
 import { BsBank, BsEar } from "react-icons/bs"
 import { MdOutlineHowToVote } from "react-icons/md"
 import { RiMenuFoldLine, RiMenuUnfoldLine } from "react-icons/ri"
+import { supabase } from '../Services/Supabase'
+import { IoLogOutOutline } from 'react-icons/io5'
 
 function SideBar() {
+    const navigate = useNavigate()
+
+    const handleLogout = async () => {
+        try {
+            await supabase.auth.signOut()
+            navigate("/")
+        } catch (error) {
+            console.error("Logout failed:", error)
+        }
+    }
 
     const [collapsed, setCollapsed] = useState(false)
 
@@ -85,6 +97,18 @@ function SideBar() {
                         </span>
                     )}
                 </a>
+                <button
+                    onClick={handleLogout}
+                    className={`
+                        flex items-center bg-red-400 gap-3 p-3 rounded-lg text-lg font-medium text-white-200
+                                hover:bg-red-500 hover:text-white transition-colors duration-150
+                                ${collapsed ? 'justify-center' : ''}`}
+                >
+                    <span className='text-xl shrink-0 '><IoLogOutOutline /></span>
+                    {!collapsed && (
+                        <span className='whitespace-nowrap overflow-hidden transition-all duration-300'>Logout</span>
+                    )}
+                </button>
             </div>
 
         </div >
