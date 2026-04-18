@@ -1,3 +1,23 @@
+import {supabase} from "./Supabase"
+export const filterPledge = async(filters={})=>
+{
+let query = supabase.from("voters").select("*")
+
+if(filters.gender){
+query=query.eq("gender",filters.gender)
+}
+
+if(filters.area_type){
+query=query.eq("area_type",filters.area_type)
+}
+/* AGE */
+
+if (filters.age === "18-25") {
+query query.gte("age", 18).lte("age", 25)
+}
+if (filters.age=== "26-40") {
+query query.gte("age", 26).lte("age", 40)
+}
 if (filters.age === "40+") {  
     query = query.gt("age", 40)  
 }  
