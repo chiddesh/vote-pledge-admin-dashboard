@@ -1,70 +1,60 @@
-import { supabase } from "./Supabase"
+const fetchFilteredData = async (filters = {}, page = 0) => {
+  const pageSize = 1000
 
-export const filterPledge = async (filters = {}) => {
-    let query = supabase.from("voters").select("*")
+  let query = supabase
+    .from("your_table")
+    .select("*", { count: "exact" })
 
-    /* GENDER */
-    if (filters.gender) {
-        query = query.eq("gender", filters.gender)
-    }
+  /* ================= AGE ================= */
+  if (filters.age === "40+") {
+    query = query.gt("age", 40)
+  }
 
-    /* AREA TYPE */
-    if (filters.area_type) {
-        query = query.eq("area_type", filters.area_type)
-    }
-    
-    /* AGE */
-    if (filters.age === "18-25") {
-        query = query.gte("age", 18).lte("age", 25)
-    }
+  /* ================= CATEGORY ================= */
+  if (filters.category && filters.category.trim() !== "") {
+    query = query.eq("category", filters.category)
+  }
 
-    if (filters.age === "26-40") {
-        query = query.gte("age", 26).lte("age", 40)
-    }
+  /* ================= COMPLETION ================= */
+  if (filters.Completion === "Completed") {
+    query = query.eq("will_vote", true)
+  } else if (filters.Completion === "Not Completed") {
+    query = query.eq("will_vote", false)
+  }
 
-    if (filters.age === "40+") {
-        query = query.gt("age", 40)
-    }
+  /* ================= FIRST TIME VOTER ================= */
+  if (
+    filters.first_time_voter !== undefined &&
+    filters.first_time_voter !== null &&
+    filters.first_time_voter !== ""
+  ) {
+    const value =
+      filters.first_time_voter === true ||
+      filters.first_time_voter === "true"
 
-    /* CATEGORY */
-    if(filters.category){
-        query = query.eq("category",filters.category)
-    }
+    query = query.eq("first_time_voter", value)
+  }
 
+  /* ================= ULB ================= */
+  if (filters.ulb && filters.ulb.trim() !== "") {
+    query = query.eq("ulb", filters.ulb)
+  }
 
-    /* COMPLETION */
-    if(filters.Completion === "Completed"){
-        query = query.eq("will_vote", true)
-    }
+  /* ================= BLOCK ================= */
+  if (filters.block && filters.block.trim() !== "") {
+    query = query.eq("block", filters.block)
+  }
 
-    if(filters.Completion === "Not Completed"){
-        query = query.eq("will_vote", false)
-    }
+  /* ================= PAGINATION ================= */
+  const from = page * pageSize
+  const to = from + pageSize - 1
 
+  const { data, error, count } = await query.range(from, to)
 
-    /* FIRST TIME VOTER */
-    if(filters.first_time_voter){
-        query = query.eq("first_time_voter", filters.first_time_voter)
-    }
+  if (error) {
+    console.error("Supabase Error:", error)
+    return { data: [], count: 0 }
+  }
 
-    /* ULB */
-    if(filters.ulb){
-        query = query.eq("ulb",filters.ulb)
-    }
-
-    /* BLOCK */
-    if(filters.block){
-        query = query.eq("block",filters.block)
-    }
-
-    /*  CONSTITUENCY */
-    if(filters.constituency){
-        query = query.eq("constituency",filters.constituency)
-    }
-
-    const { data, error } = await query
-
-    if (error) throw new Error(error.message)
-
-    return data
+  return { data: data || [], count: count || 0 }
 }
