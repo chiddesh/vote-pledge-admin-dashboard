@@ -17,56 +17,40 @@ function Home() {
         { type: "dropdown", label: "first_time_voter", options: ["YES", "NO"] },
         {
             type: "dropdown", label: "ulb", options: [
-                "Ammoor TP",
-                "Kalavai TP",
-                "Kaveripakkam TP",
-                "Nemili TP",
-                "Panapakkam TP",
-                "Thakkolam TP",
-                "Thimiri TP",
-                "Vilapakkam TP",
-                "Arakkonam MP",
-                "Arcot MP",
-                "Melvisharam MP",
-                "Ranipet MP",
-                "Sholinghur MP",
-                "Wallajah MP"
+                "Ammoor TP", "Kalavai TP", "Kaveripakkam TP", "Nemili TP", "Panapakkam TP",
+                "Thakkolam TP", "Thimiri TP", "Vilapakkam TP", "Arakkonam MP", "Arcot MP",
+                "Melvisharam MP", "Ranipet MP", "Sholinghur MP", "Wallajah MP"
             ]
         },
         {
             type: "dropdown", label: "block", options: [
-                "Arakkonam",
-                "Arcot",
-                "Kaveripakkam",
-                "Nemili",
-                "Sholingur",
-                "Thimiri",
-                "Walaja"
+                "Arakkonam", "Arcot", "Kaveripakkam", "Nemili", "Sholingur", "Thimiri", "Walaja"
             ]
         },
         {
             type: "dropdown", label: "constituency", options: [
-                "Arakkonam",
-                "Sholingur",
-                "Ranipet",
-                "Arcot",
-                "Katpadi"
+                "Arakkonam", "Sholingur", "Ranipet", "Arcot", "Katpadi"
             ]
         }
     ]
 
     const [filters, setFilters] = useState({})
+    const [page, setPage] = useState(1)
 
     const handleFilter = (key, value) => {
+        setPage(1) // reset page on filter change
         setFilters(prev => ({
             ...prev,
             [key]: prev[key] === value ? null : value
         }))
     }
 
-    const resetFilters = () => setFilters({})
+    const resetFilters = () => {
+        setFilters({})
+        setPage(1)
+    }
 
-    const { data, isLoading, error } = useFilterPledge(filters)
+    const { data, isLoading, error } = useFilterPledge(filters, page)
 
     return (
         <>
@@ -101,9 +85,7 @@ function Home() {
                                 >
                                     <option value="">Select {f.label}</option>
                                     {f.options.map((opt, i) => (
-                                        <option key={i} value={opt}>
-                                            {opt}
-                                        </option>
+                                        <option key={i} value={opt}>{opt}</option>
                                     ))}
                                 </select>
                             )
@@ -147,6 +129,25 @@ function Home() {
                             {data && data.map((p) => (
                                 <PledgeItem key={p.id} p={p} />
                             ))}
+                        </div>
+
+                        {/* Pagination Controls */}
+                        <div className='flex justify-center gap-4 p-4'>
+                            <button
+                                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                                className='px-4 py-2 bg-gray-200 rounded-lg'
+                            >
+                                Prev
+                            </button>
+
+                            <span className='px-4 py-2'>Page {page}</span>
+
+                            <button
+                                onClick={() => setPage(prev => prev + 1)}
+                                className='px-4 py-2 bg-gray-200 rounded-lg'
+                            >
+                                Next
+                            </button>
                         </div>
 
                     </div>

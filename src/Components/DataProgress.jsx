@@ -1,22 +1,11 @@
 import React from 'react'
 import { FaUsers } from "react-icons/fa";
 import { MdHowToVote } from "react-icons/md";
-import { IoStatsChart } from "react-icons/io5";
-import { useFilterPledge } from '../hooks/useFilterPledge';
+import { useStats } from '../hooks/useStats';
 
 function DataProgress() {
 
-    const { data = [], isLoading } = useFilterPledge()
-
-    const total = data.length
-
-    const today = new Date().toDateString()
-    const todayCount = data.filter(p =>
-        new Date(p.created_at).toDateString() === today
-    ).length
-
-    const completed = data.filter(p => p.will_vote).length
-    const completion = total ? ((completed / total) * 100).toFixed(1) : 0
+    const { data, isLoading } = useStats()
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -27,7 +16,9 @@ function DataProgress() {
                 </div>
                 <div>
                     <p className='text-gray-500 text-sm'>Total Pledge</p>
-                    <p className='text-2xl font-bold'>{isLoading ? "..." : total}</p>
+                    <p className='text-2xl font-bold'>
+                        {isLoading ? "..." : data?.total}
+                    </p>
                 </div>
             </div>
 
@@ -37,7 +28,9 @@ function DataProgress() {
                 </div>
                 <div>
                     <p className='text-gray-500 text-sm'>Per Day Pledge</p>
-                    <p className='text-2xl font-bold'>{isLoading ? "..." : todayCount}</p>
+                    <p className='text-2xl font-bold'>
+                        {isLoading ? "..." : data?.todayCount}
+                    </p>
                 </div>
             </div>
 
@@ -49,12 +42,19 @@ function DataProgress() {
                     </div>
                     <div>
                         <p className='text-gray-500 text-sm'>Completion</p>
-                        <p className='text-2xl font-bold'>{isLoading ? "..." : `${completion}%`}</p>
+                        <p className='text-2xl font-bold'>
+                            {isLoading ? "..." : `${data?.completion}%`}
+                        </p>
                     </div>
                 </div>
+
                 <div className='w-full bg-gray-200 h-2 rounded-full'>
-                    <div className='bg-purple-600 h-2 rounded-full' style={{ width: `${completion}%` }}></div>
+                    <div
+                        className='bg-purple-600 h-2 rounded-full'
+                        style={{ width: `${data?.completion || 0}%` }}
+                    ></div>
                 </div>
+
             </div>
         </div>
     )
