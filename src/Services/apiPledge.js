@@ -1,60 +1,33 @@
-const fetchFilteredData = async (filters = {}, page = 0) => {
-  const pageSize = 1000
+if (filters.age === "40+") {  
+    query = query.gt("age", 40)  
+}  
 
-  let query = supabase
-    .from("your_table")
-    .select("*", { count: "exact" })
+/* CATEGORY */  
+if(filters.category){  
+    query = query.eq("category",filters.category)  
+}  
 
-  /* ================= AGE ================= */
-  if (filters.age === "40+") {
-    query = query.gt("age", 40)
-  }
 
-  /* ================= CATEGORY ================= */
-  if (filters.category && filters.category.trim() !== "") {
-    query = query.eq("category", filters.category)
-  }
+/* COMPLETION */  
+if(filters.Completion === "Completed"){  
+    query = query.eq("will_vote", true)  
+}  
 
-  /* ================= COMPLETION ================= */
-  if (filters.Completion === "Completed") {
-    query = query.eq("will_vote", true)
-  } else if (filters.Completion === "Not Completed") {
-    query = query.eq("will_vote", false)
-  }
+if(filters.Completion === "Not Completed"){  
+    query = query.eq("will_vote", false)  
+}  
 
-  /* ================= FIRST TIME VOTER ================= */
-  if (
-    filters.first_time_voter !== undefined &&
-    filters.first_time_voter !== null &&
-    filters.first_time_voter !== ""
-  ) {
-    const value =
-      filters.first_time_voter === true ||
-      filters.first_time_voter === "true"
 
-    query = query.eq("first_time_voter", value)
-  }
+/* FIRST TIME VOTER */  
+if(filters.first_time_voter){  
+    query = query.eq("first_time_voter", filters.first_time_voter)  
+}  
 
-  /* ================= ULB ================= */
-  if (filters.ulb && filters.ulb.trim() !== "") {
-    query = query.eq("ulb", filters.ulb)
-  }
+/* ULB */  
+if(filters.ulb){  
+    query = query.eq("ulb",filters.ulb)  
+}  
 
-  /* ================= BLOCK ================= */
-  if (filters.block && filters.block.trim() !== "") {
-    query = query.eq("block", filters.block)
-  }
-
-  /* ================= PAGINATION ================= */
-  const from = page * pageSize
-  const to = from + pageSize - 1
-
-  const { data, error, count } = await query.range(from, to)
-
-  if (error) {
-    console.error("Supabase Error:", error)
-    return { data: [], count: 0 }
-  }
-
-  return { data: data || [], count: count || 0 }
-}
+/* BLOCK */  
+if(filters.block){  
+    query = query.eq("block",filters.block)
