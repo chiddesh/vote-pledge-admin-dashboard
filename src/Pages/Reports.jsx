@@ -4,6 +4,7 @@ import FilterBtn from '../Components/FilterBtn'
 import PledgeItem from '../Components/PledgeItem'
 import { useFilterPledge } from '../hooks/useFilterPledge'
 import * as XLSX from "xlsx"
+import { supabase } from "../Services/Supabase"
 
 function Reports() {
 
@@ -17,46 +18,25 @@ function Reports() {
         { type: "dropdown", label: "first_time_voter", options: ["YES", "NO"] },
         {
             type: "dropdown", label: "ulb", options: [
-                "Ammoor TP",
-                "Kalavai TP",
-                "Kaveripakkam TP",
-                "Nemili TP",
-                "Panapakkam TP",
-                "Thakkolam TP",
-                "Thimiri TP",
-                "Vilapakkam TP",
-                "Arakkonam MP",
-                "Arcot MP",
-                "Melvisharam MP",
-                "Ranipet MP",
-                "Sholinghur MP",
-                "Wallajah MP"
+                "Ammoor TP", "Kalavai TP", "Kaveripakkam TP", "Nemili TP", "Panapakkam TP",
+                "Thakkolam TP", "Thimiri TP", "Vilapakkam TP", "Arakkonam MP", "Arcot MP",
+                "Melvisharam MP", "Ranipet MP", "Sholinghur MP", "Wallajah MP"
             ]
         },
         {
             type: "dropdown", label: "block", options: [
-                "Arakkonam",
-                "Arcot",
-                "Kaveripakkam",
-                "Nemili",
-                "Sholingur",
-                "Thimiri",
-                "Walaja"
+                "Arakkonam", "Arcot", "Kaveripakkam", "Nemili", "Sholingur", "Thimiri", "Walaja"
             ]
         },
         {
             type: "dropdown", label: "constituency", options: [
-                "Arakkonam",
-                "Sholingur",
-                "Ranipet",
-                "Arcot",
-                "Katpadi"
+                "Arakkonam", "Sholingur", "Ranipet", "Arcot", "Katpadi"
             ]
         }
     ]
 
-
     const [filters, setFilters] = useState({})
+    const [downloading, setDownloading] = useState(false)
 
     const handleFilter = (key, value) => {
         setFilters(prev => ({
@@ -69,45 +49,105 @@ function Reports() {
 
     const { data, isLoading, error } = useFilterPledge(filters)
 
-    const total = data?.length || 0
-    const today = new Date().toDateString()
-    const todayCount = data?.filter(p =>
-        new Date(p.created_at).toDateString() === today
-    ).length || 0
+    const delay = (ms) => new Promise(res => setTimeout(res, ms))
 
-    const completed = data?.filter(p => p.will_vote).length || 0
-    const completion = total ? ((completed / total) * 100).toFixed(1) : 0
+    const downloadExcel = async () => {
+        setDownloading(true)
 
-    const downloadExcel = () => {
-        if (!data || data.length === 0) return
+        try {
+            let allData = []
+            let page = 1
+            const limit = 1000
 
-        const summary = [
-            {
-                total_pledges: total,
-                Today_pledges: todayCount,
-                Completion_percentage: completion + "%"
+            while (true) {
+
+                const from = (page - 1) * limit
+                const to = from + limit - 1
+
+                let query = supabase
+                    .from("voters")
+                    .select("*")
+                    .range(from, to)
+
+                // filters
+                if (filters.gender) query = query.eq("gender", filters.gender)
+                if (filters.area_type) query = query.eq("area_type", filters.area_type)
+
+                if (filters.age === "18-25") query = query.gte("age", 18).lte("age", 25)
+                if (filters.age === "26-40") query = query.gte("age", 26).lte("age", 40)
+                if (filters.age === "40+") query = query.gt("age", 40)
+
+                if (filters.category) query = query.eq("category", filters.category)
+
+                if (filters.Completion === "Completed") query = query.eq("will_vote", true)
+                if (filters.Completion === "Not Completed") query = query.eq("will_vote", false)
+
+                if (filters.first_time_voter) query = query.eq("first_time_voter", filters.first_time_voter)
+                if (filters.ulb) query = query.eq("ulb", filters.ulb)
+                if (filters.block) query = query.eq("block", filters.block)
+                if (filters.constituency) query = query.eq("constituency", filters.constituency)
+
+                const { data, error } = await query
+
+                if (error) {
+                    console.error(error)
+                    break
+                }
+
+                if (!data || data.length === 0) break
+
+                allData = [...allData, ...data]
+
+                if (data.length < limit) break
+
+                page++
+
+                await delay(50) // prevent UI freeze
             }
-        ]
 
-        const detailed = data.map(p => ({
-            Name: p.name,
-            Age: p.age,
-            Gender: p.gender,
-            AreaType: p.area_type,
-            Block: p.block,
-            Category: p.category,
-            Constituency: p.constituency,
-            Status: p.will_vote ? "Completed" : "Pending",
-        }))
+            if (allData.length === 0) return
 
-        const wb = XLSX.utils.book_new()
-        const summarySheet = XLSX.utils.json_to_sheet(summary)
-        const dataSheet = XLSX.utils.json_to_sheet(detailed)
+            const total = allData.length
 
-        XLSX.utils.book_append_sheet(wb, summarySheet, "Summary")
-        XLSX.utils.book_append_sheet(wb, dataSheet, "Pledges")
+            const today = new Date().toDateString()
+            const todayCount = allData.filter(p =>
+                new Date(p.created_at).toDateString() === today
+            ).length
 
-        XLSX.writeFile(wb, `Pledge_report_${Date.now()}.xlsx`)
+            const completed = allData.filter(p => p.will_vote).length
+            const completion = total ? ((completed / total) * 100).toFixed(1) : 0
+
+            const summary = [
+                {
+                    total_pledges: total,
+                    Today_pledges: todayCount,
+                    Completion_percentage: completion + "%"
+                }
+            ]
+
+            const detailed = allData.map(p => ({
+                Name: p.name,
+                Age: p.age,
+                Gender: p.gender,
+                AreaType: p.area_type,
+                Block: p.block,
+                Category: p.category,
+                Constituency: p.constituency,
+                Status: p.will_vote ? "Completed" : "Pending",
+            }))
+
+            const wb = XLSX.utils.book_new()
+            const summarySheet = XLSX.utils.json_to_sheet(summary)
+            const dataSheet = XLSX.utils.json_to_sheet(detailed)
+
+            XLSX.utils.book_append_sheet(wb, summarySheet, "Summary")
+            XLSX.utils.book_append_sheet(wb, dataSheet, "Pledges")
+
+            XLSX.writeFile(wb, `Pledge_report_${Date.now()}.xlsx`)
+
+        } finally {
+            setDownloading(false)
+        }
     }
 
     return (
@@ -143,9 +183,7 @@ function Reports() {
                                     >
                                         <option value="">Select {f.label}</option>
                                         {f.options.map((opt, i) => (
-                                            <option key={i} value={opt}>
-                                                {opt}
-                                            </option>
+                                            <option key={i} value={opt}>{opt}</option>
                                         ))}
                                     </select>
                                 )
@@ -166,10 +204,10 @@ function Reports() {
 
                     <button
                         onClick={downloadExcel}
-                        disabled={!data || data.length === 0}
+                        disabled={downloading}
                         className='px-10 text-sm py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 disabled:opacity-50'
                     >
-                        Download Excel
+                        {downloading ? "Downloading..." : "Download Excel"}
                     </button>
                 </div>
 
